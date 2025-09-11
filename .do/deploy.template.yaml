@@ -1,5 +1,5 @@
 spec:
-  name: PeerSync.IndexServer
+  name: peersyncindexserver
   services:
   - dockerfile_path: Dockerfile
     git:
