@@ -11,6 +11,7 @@ namespace PeerSync;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 public class SetPeerRequest
 {
@@ -39,6 +40,17 @@ public class PeerController(IPeerService syncService)
 		IPAddress? localIp = null;
 		IPAddress.TryParse(setRequest.LocalAddress, out localIp);
 		ushort port = setRequest.Port;
+
+		// On the digital ocean app platform, remote IP is captured in
+		// the HTTP_DO_CONNECTING_IP header by the load balancers.
+		this.Request.Headers.TryGetValue("HTTP_DO_CONNECTING_IP", out StringValues digitalOceanClientIp);
+		foreach (string? doIp in digitalOceanClientIp)
+		{
+			if (doIp == null)
+				continue;
+
+			ip = IPAddress.Parse(doIp);
+		}
 
 		if (string.IsNullOrEmpty(fingerprint) || ip == null || port == 0)
 			return this.BadRequest();
