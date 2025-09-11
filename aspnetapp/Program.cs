@@ -1,71 +1,40 @@
-using System.Text.Json.Serialization;
+// .______ _____ ___________   _______   ___   _ _____
+//  | ___ \  ___|  ___| ___ \ /  ___\ \ / / \ | /  __ \
+//  | |_/ / |__ | |__ | |_/ / \ `--. \ V /|  \| | /  \/
+//  |  __/|  __||  __||    /   `--. \ \ / | . ` | |
+//  | |   | |___| |___| |\ \  /\__/ / | | | |\  | \__/
+//  \_|   \____/\____/\_| \_| \____/  \_/ \_| \_/\____/
+//  This software is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE v3
 
-var builder = WebApplication.CreateBuilder(args);
+namespace PeerSync;
 
-// Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddHealthChecks();
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.HttpOverrides;
 
-// Uncomment if using System.Text.Json source generation
-// builder.Services.ConfigureHttpJsonOptions(options =>
-// {
-//     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-// });
-
-var app = builder.Build();
-
-app.MapHealthChecks("/healthz");
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+public class Program
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+	public static void Main(string[] args)
+	{
+		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		var services = builder.Services;
+
+		services.AddControllers();
+		services.AddHealthChecks();
+
+		services.AddSingleton<IPeerService, PeerService>();
+
+		WebApplication app = builder.Build();
+		app.MapHealthChecks("/healthz");
+		app.MapControllerRoute("default", "{controller=Home}/{action=Index}");
+		app.MapControllers();
+
+		app.MapGet("/Environment", () => new EnvironmentInfo());
+
+		ForwardedHeadersOptions forwardedHeaders = new();
+		forwardedHeaders.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+		app.UseForwardedHeaders(forwardedHeaders);
+
+		app.Run();
+	}
 }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-CancellationTokenSource cancellation = new();
-app.Lifetime.ApplicationStopping.Register( () =>
-{
-    cancellation.Cancel();
-});
-
-app.MapGet("/Environment", () =>
-{
-    return new EnvironmentInfo();
-});
-
-// This API demonstrates how to use task cancellation
-// to support graceful container shutdown via SIGTERM.
-// The method itself is an example and not useful.
-app.MapGet("/Delay/{value}", async (int value) =>
-{
-    try
-    {
-        await Task.Delay(value, cancellation.Token);
-    }
-    catch(TaskCanceledException)
-    {
-    }
-
-    return new Operation(value);
-});
-
-app.Run();
-
-[JsonSerializable(typeof(EnvironmentInfo))]
-[JsonSerializable(typeof(Operation))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-}
-
-public record struct Operation(int Delay);
