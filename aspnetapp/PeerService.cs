@@ -49,6 +49,8 @@ public class PeerService : IPeerService
 		entry.Updated = DateTime.UtcNow;
 		this.peers[fingerprint] = entry;
 
+		this.Log.LogInformation($"Got: {fingerprint} -> {address}:{port}");
+
 		return this.peers.Count;
 	}
 
