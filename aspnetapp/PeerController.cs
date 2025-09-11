@@ -42,8 +42,8 @@ public class PeerController(IPeerService syncService)
 		ushort port = setRequest.Port;
 
 		// On the digital ocean app platform, remote IP is captured in
-		// the HTTP_DO_CONNECTING_IP header by the load balancers.
-		this.Request.Headers.TryGetValue("HTTP_DO_CONNECTING_IP", out StringValues digitalOceanClientIp);
+		// the do-connecting-ip header by the load balancers.
+		this.Request.Headers.TryGetValue("do-connecting-ip", out StringValues digitalOceanClientIp);
 		foreach (string? doIp in digitalOceanClientIp)
 		{
 			if (doIp == null)

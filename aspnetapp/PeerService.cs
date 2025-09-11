@@ -49,8 +49,6 @@ public class PeerService : IPeerService
 		entry.Updated = DateTime.UtcNow;
 		this.peers[fingerprint] = entry;
 
-		this.Log.LogInformation($"Got: {fingerprint} -> {address}:{port}");
-
 		return this.peers.Count;
 	}
 
@@ -89,8 +87,6 @@ public class PeerService : IPeerService
 		{
 			this.peers.TryRemove(fingerprint, out Peer peer);
 		}
-
-		this.Log.LogInformation($"Trimmed {offlineFingerprints.Count} peers");
 	}
 
 	public struct Peer
