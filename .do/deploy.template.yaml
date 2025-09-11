@@ -5,4 +5,4 @@ spec:
     git:
       branch: main
       repo_clone_url: https://github.com/UnlostWorld/PeerSync.IndexServer.git
-    name: PeerSync.IndexServer
+    name: peersyncindexserver
