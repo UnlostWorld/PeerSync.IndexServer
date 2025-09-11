@@ -1,8 +1,8 @@
 spec:
-  name: sample-aspnetapp
+  name: PeerSync.IndexServer
   services:
   - dockerfile_path: Dockerfile
     git:
       branch: main
-      repo_clone_url: https://github.com/digitalocean/sample-aspnet.git
-    name: sample-aspnet
+      repo_clone_url: https://github.com/UnlostWorld/PeerSync.IndexServer.git
+    name: PeerSync.IndexServer

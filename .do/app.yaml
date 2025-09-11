@@ -1,8 +1,8 @@
-name: sample-aspnetapp
+name: PeerSync Index Server
 services:
 - dockerfile_path: /Dockerfile
   github:
     branch: main
     deploy_on_push: true
-    repo: digitalocean/sample-aspnet
-  name: sample-aspnet
+    repo: UnlostWorld/PeerSync.IndexServer
+  name: PeerSync.IndexServer
