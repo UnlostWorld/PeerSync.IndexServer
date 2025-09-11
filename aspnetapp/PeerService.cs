@@ -9,6 +9,7 @@
 namespace PeerSync;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,8 @@ public interface IPeerService
 public class PeerService : IPeerService
 {
 	protected readonly ILogger Log;
-	private readonly Dictionary<string, Peer> peers = new();
+	private readonly ConcurrentDictionary<string, Peer> peers = new();
+	private readonly Timer cleanupTimer;
 
 	public int Count => this.peers.Count;
 
@@ -31,12 +33,14 @@ public class PeerService : IPeerService
 	{
 		this.Log = log;
 		this.Log.LogInformation("Sync service online");
+
+		this.cleanupTimer = new(this.Clean, null, TimeSpan.Zero, TimeSpan.FromSeconds(60));
 	}
 
 	public int SetPeer(string fingerprint, IPAddress address, IPAddress? localAddress, ushort port)
 	{
 		if (!this.peers.ContainsKey(fingerprint))
-			this.peers.Add(fingerprint, default);
+			this.peers.TryAdd(fingerprint, default);
 
 		Peer entry = this.peers[fingerprint];
 		entry.Address = address;
@@ -65,6 +69,20 @@ public class PeerService : IPeerService
 		}
 
 		return success;
+	}
+
+	private void Clean(object? state)
+	{
+		HashSet<string> offlineFingerprints = new();
+		foreach ((string fingerprint, Peer peer) in this.peers)
+		{
+			offlineFingerprints.Add(fingerprint);
+		}
+
+		foreach (string fingerprint in offlineFingerprints)
+		{
+			this.peers.TryRemove(fingerprint, out Peer peer);
+		}
 	}
 
 	public struct Peer
