@@ -32,13 +32,13 @@ public class PeerController(IPeerService syncService)
 	: Controller
 {
 	[HttpPost]
-	public IActionResult Set([FromBody] SetPeerRequest heartbeat)
+	public IActionResult Set([FromBody] SetPeerRequest setRequest)
 	{
-		string? fingerprint = heartbeat.Fingerprint;
+		string? fingerprint = setRequest.Fingerprint;
 		IPAddress? ip = this.HttpContext.Connection.RemoteIpAddress;
 		IPAddress? localIp = null;
-		IPAddress.TryParse(heartbeat.LocalAddress, out localIp);
-		ushort port = heartbeat.Port;
+		IPAddress.TryParse(setRequest.LocalAddress, out localIp);
+		ushort port = setRequest.Port;
 
 		if (string.IsNullOrEmpty(fingerprint) || ip == null || port == 0)
 			return this.BadRequest();

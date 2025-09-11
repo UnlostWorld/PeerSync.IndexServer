@@ -11,6 +11,7 @@ namespace PeerSync;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 public class Program
 {
@@ -33,6 +34,8 @@ public class Program
 
 		ForwardedHeadersOptions forwardedHeaders = new();
 		forwardedHeaders.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+		forwardedHeaders.KnownProxies.Clear();
+		forwardedHeaders.KnownNetworks.Clear();
 		app.UseForwardedHeaders(forwardedHeaders);
 
 		app.Run();
