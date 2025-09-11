@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 public interface IPeerService
 {
+	int Count { get; }
 	int SetPeer(string identifier, IPAddress address, IPAddress? localAddress, ushort port);
 	bool GetPeer(string identifier, out IPAddress? address, out IPAddress? localAddress, out ushort port);
 }
@@ -23,6 +24,8 @@ public class PeerService : IPeerService
 {
 	protected readonly ILogger Log;
 	private readonly Dictionary<string, Peer> peers = new();
+
+	public int Count => this.peers.Count;
 
 	public PeerService(ILogger<PeerService> log)
 	{

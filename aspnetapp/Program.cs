@@ -27,10 +27,14 @@ public class Program
 
 		WebApplication app = builder.Build();
 		app.MapHealthChecks("/healthz");
-		app.MapControllerRoute("default", "{controller=Home}/{action=Index}");
 		app.MapControllers();
 
 		app.MapGet("/Environment", () => new EnvironmentInfo());
+
+		app.MapGet("/Index", (IPeerService peerService) =>
+		{
+			return $"Peer Sync Index Server is online with {peerService.Count} peers";
+		});
 
 		ForwardedHeadersOptions forwardedHeaders = new();
 		forwardedHeaders.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
