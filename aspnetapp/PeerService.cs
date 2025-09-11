@@ -54,14 +54,14 @@ public class PeerService : IPeerService
 
 	public bool GetPeer(string fingerprint, out IPAddress? address, out IPAddress? localAddress, out ushort port)
 	{
-		bool success = this.peers.TryGetValue(fingerprint, out Peer entry);
-		address = entry.Address;
-		localAddress = entry.LocalAddress;
-		port = entry.Port;
+		bool success = this.peers.TryGetValue(fingerprint, out Peer peer);
+		address = peer.Address;
+		localAddress = peer.LocalAddress;
+		port = peer.Port;
 
 		if (success)
 		{
-			TimeSpan age = DateTime.UtcNow - entry.Updated;
+			TimeSpan age = DateTime.UtcNow - peer.Updated;
 			if (age >= TimeSpan.FromSeconds(120))
 			{
 				return false;
@@ -76,13 +76,19 @@ public class PeerService : IPeerService
 		HashSet<string> offlineFingerprints = new();
 		foreach ((string fingerprint, Peer peer) in this.peers)
 		{
-			offlineFingerprints.Add(fingerprint);
+			TimeSpan age = DateTime.UtcNow - peer.Updated;
+			if (age >= TimeSpan.FromSeconds(120))
+			{
+				offlineFingerprints.Add(fingerprint);
+			}
 		}
 
 		foreach (string fingerprint in offlineFingerprints)
 		{
 			this.peers.TryRemove(fingerprint, out Peer peer);
 		}
+
+		this.Log.LogInformation($"Trimmed {offlineFingerprints.Count} peers");
 	}
 
 	public struct Peer
