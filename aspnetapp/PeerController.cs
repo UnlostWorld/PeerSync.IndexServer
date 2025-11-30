@@ -56,7 +56,11 @@ public class PeerController(IPeerService syncService)
 			return this.BadRequest();
 
 		int peerCount = syncService.SetPeer(fingerprint, ip, localIp, port);
-		return this.Content(peerCount.ToString());
+
+		string? name = Environment.GetEnvironmentVariable("SERVER_NAME");
+		string? motd = Environment.GetEnvironmentVariable("SERVER_MOTD");
+
+		return this.Content($"{name}\n{motd}\n{peerCount}");
 	}
 
 	[HttpPost]

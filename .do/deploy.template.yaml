@@ -6,3 +6,12 @@ spec:
       branch: main
       repo_clone_url: https://github.com/UnlostWorld/PeerSync.IndexServer.git
     name: peersyncindexserver
+  envs:
+    - key: SERVER_NAME
+      value: My Index Server
+      scope: RUN_TIME
+      type: general
+    - key: SERVER_MOTD
+      value: Welcome to Peer Sync!
+      scope: RUN_TIME
+      type: general

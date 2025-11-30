@@ -15,6 +15,7 @@ using System.Net;
 
 public class Program
 {
+	// TODO: Move this to a configuration pn
 	public static void Main(string[] args)
 	{
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -33,7 +34,7 @@ public class Program
 
 		app.MapGet("/Index", (IPeerService peerService) =>
 		{
-			return $"Peer Sync Index Server is online with {peerService.Count} peers";
+			return $"Peer Sync Index Server is online with {peerService.Count} users";
 		});
 
 		ForwardedHeadersOptions forwardedHeaders = new();
