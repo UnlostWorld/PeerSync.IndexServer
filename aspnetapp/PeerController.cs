@@ -66,7 +66,7 @@ public class PeerController(IPeerService syncService)
 		response.OnlineUsers = syncService.SetPeer(fingerprint, ip, localIp, port);
 		response.ServerName = Environment.GetEnvironmentVariable("SERVER_NAME");
 		response.Motd = Environment.GetEnvironmentVariable("SERVER_MOTD");
-		return response;
+		return Json(response);
 	}
 
 	[HttpPost]
