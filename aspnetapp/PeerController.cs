@@ -20,6 +20,13 @@ public class SetPeerRequest
 	public ushort Port { get; set; }
 }
 
+public class SetPeerResponse
+{
+	public string? Motd { get; set; }
+	public string? ServerName { get; set; }
+	public int OnlineUsers { get; set; }
+}
+
 public class GetPeerRequest
 {
 	public string? Fingerprint { get; set; }
@@ -55,12 +62,11 @@ public class PeerController(IPeerService syncService)
 		if (string.IsNullOrEmpty(fingerprint) || ip == null || port == 0)
 			return this.BadRequest();
 
-		int peerCount = syncService.SetPeer(fingerprint, ip, localIp, port);
-
-		string? name = Environment.GetEnvironmentVariable("SERVER_NAME");
-		string? motd = Environment.GetEnvironmentVariable("SERVER_MOTD");
-
-		return this.Content($"{name}\n{motd}\n{peerCount}");
+		SetPeerResponse response = new();
+		response.OnlineUsers = syncService.SetPeer(fingerprint, ip, localIp, port);
+		response.ServerName = Environment.GetEnvironmentVariable("SERVER_NAME");
+		response.Motd = Environment.GetEnvironmentVariable("SERVER_MOTD");
+		return response;
 	}
 
 	[HttpPost]
