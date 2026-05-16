@@ -15,7 +15,8 @@ using Microsoft.Extensions.Primitives;
 
 public class SetPeerRequest
 {
-	public string? Fingerprint { get; set; }
+	public string? GroupFingerprint { get; set; }
+	public string? MemberFingerprint { get; set; }
 	public string? LocalAddress { get; set; }
 	public ushort Port { get; set; }
 }
@@ -29,20 +30,23 @@ public class SetPeerResponse
 
 public class GetPeerRequest
 {
-	public string? Fingerprint { get; set; }
+	public string? GroupFingerprint { get; set; }
+	public string? MemberFingerprint { get; set; }
 	public string? Address { get; set; }
 	public string? LocalAddress { get; set; }
 	public ushort Port { get; set; }
+	public HashSet<string>? Members { get; set; }
 }
 
 [Route("[controller]/[action]")]
-public class PeerController(IPeerService syncService)
+public class PeerController(IGroupService groupService)
 	: Controller
 {
 	[HttpPost]
 	public IActionResult Set([FromBody] SetPeerRequest setRequest)
 	{
-		string? fingerprint = setRequest.Fingerprint;
+		string? groupFingerprint = setRequest.GroupFingerprint;
+		string? memberFingerprint = setRequest.MemberFingerprint;
 		IPAddress? ip = this.HttpContext.Connection.RemoteIpAddress;
 		IPAddress? localIp = null;
 		IPAddress.TryParse(setRequest.LocalAddress, out localIp);
@@ -59,11 +63,11 @@ public class PeerController(IPeerService syncService)
 			ip = IPAddress.Parse(doIp);
 		}
 
-		if (string.IsNullOrEmpty(fingerprint) || ip == null || port == 0)
+		if (string.IsNullOrEmpty(memberFingerprint) || ip == null || port == 0)
 			return this.BadRequest();
 
 		SetPeerResponse response = new();
-		response.OnlineUsers = syncService.SetPeer(fingerprint, ip, localIp, port);
+		response.OnlineUsers = groupService.SetMember(groupFingerprint, memberFingerprint, ip, localIp, port);
 		response.ServerName = Environment.GetEnvironmentVariable("SERVER_NAME");
 		response.Motd = Environment.GetEnvironmentVariable("SERVER_MOTD");
 		return Json(response);
@@ -72,13 +76,13 @@ public class PeerController(IPeerService syncService)
 	[HttpPost]
 	public IActionResult Get([FromBody] GetPeerRequest request)
 	{
-		string? fingerprint = request.Fingerprint;
-		if (string.IsNullOrEmpty(fingerprint))
+		if (string.IsNullOrEmpty(request.MemberFingerprint))
 			return this.NotFound();
 
 		GetPeerRequest response = request;
-		bool valid = syncService.GetPeer(
-			fingerprint,
+		bool valid = groupService.GetMember(
+			request.GroupFingerprint,
+			request.MemberFingerprint,
 			out var address,
 			out var localAddress,
 			out var port);
@@ -88,6 +92,21 @@ public class PeerController(IPeerService syncService)
 			response.LocalAddress = localAddress?.ToString();
 			response.Port = port;
 		}
+
+		JsonSerializerOptions op = new();
+		op.WriteIndented = true;
+		string json = JsonSerializer.Serialize(response, op);
+		return this.Content(json);
+	}
+
+	[HttpPost]
+	public IActionResult GetMembers([FromBody] GetPeerRequest request)
+	{
+		if (string.IsNullOrEmpty(request.GroupFingerprint))
+			return this.NotFound();
+
+		GetPeerRequest response = request;
+		response.Members = groupService.GetMembers(request.GroupFingerprint);
 
 		JsonSerializerOptions op = new();
 		op.WriteIndented = true;
