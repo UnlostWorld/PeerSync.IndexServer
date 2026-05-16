@@ -24,7 +24,7 @@ public class Program
 		services.AddControllers();
 		services.AddHealthChecks();
 
-		services.AddSingleton<IPeerService, PeerService>();
+		services.AddSingleton<IGroupService, GroupService>();
 
 		WebApplication app = builder.Build();
 		app.MapHealthChecks("/healthz");
@@ -32,7 +32,7 @@ public class Program
 
 		app.MapGet("/Environment", () => new EnvironmentInfo());
 
-		app.MapGet("/Index", (IPeerService peerService) =>
+		app.MapGet("/Index", (IGroupService peerService) =>
 		{
 			return $"Peer Sync Index Server is online with {peerService.Count} users";
 		});
