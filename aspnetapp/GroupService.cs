@@ -85,7 +85,7 @@ public class GroupService : IGroupService
 		}
 
 		// Add dummy fingerprints until we have 1024 entries to return.
-		while (memberFingerprints.Count < 1024)
+		/*while (memberFingerprints.Count < 1024)
 		{
 			HashAlgorithm algorithm = SHA256.Create();
 			string input = $"{DateTime.UtcNow.Millisecond * Random.Shared.NextDouble()}";
@@ -93,7 +93,7 @@ public class GroupService : IGroupService
 			string dummy = BitConverter.ToString(bytes);
 			dummy = dummy.Replace("-", string.Empty, StringComparison.Ordinal);
 			memberFingerprints.Add(dummy);
-		}
+		}*/
 
 		return memberFingerprints;
 	}
