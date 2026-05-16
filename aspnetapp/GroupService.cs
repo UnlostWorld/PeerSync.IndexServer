@@ -79,7 +79,7 @@ public class GroupService : IGroupService
 			{
 				foreach ((string memberFingerprint, Peer peer) in group.Peers)
 				{
-					memberFingerprints.Add(groupFingerprint);
+					memberFingerprints.Add(memberFingerprint);
 				}
 			}
 		}
